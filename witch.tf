@@ -1,19 +1,17 @@
 
-# Witch Role - Upload and delete Halloween gallery objects
+# Witch IAM Role - Upload and delete S3 objects
 
 resource "aws_iam_role" "witch" {
   name = "tsi-halloween-witch-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
-
     Statement = [
       {
         Effect = "Allow"
         Action = "sts:AssumeRole"
-
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/AccountFullAccessRole"
+          AWS = var.trusted_role_arn
         }
       }
     ]
@@ -25,25 +23,31 @@ resource "aws_iam_role" "witch" {
   }
 }
 
-resource "aws_iam_role_policy" "witch_write" {
-  name = "tsi-halloween-witch-write"
-  role = aws_iam_role.witch.id
+# Customer-managed IAM policy
+
+resource "aws_iam_policy" "witch_write" {
+  name        = "tsi-halloween-witch-write"
+  description = "Upload and delete objects in Halloween gallery"
 
   policy = jsonencode({
     Version = "2012-10-17"
-
     Statement = [
       {
         Sid    = "UploadDeleteGalleryObjects"
         Effect = "Allow"
-
         Action = [
           "s3:PutObject",
           "s3:DeleteObject"
         ]
-
         Resource = "${aws_s3_bucket.gallery.arn}/*"
       }
     ]
   })
+}
+
+# Attach policy to Witch role
+
+resource "aws_iam_role_policy_attachment" "witch_write" {
+  role       = aws_iam_role.witch.name
+  policy_arn = aws_iam_policy.witch_write.arn
 }

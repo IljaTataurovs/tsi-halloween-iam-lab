@@ -1,19 +1,17 @@
 
-# Zombie Role - Manage gallery objects and tags
+# Zombie IAM Role - Manage S3 objects and tags
 
 resource "aws_iam_role" "zombie" {
   name = "tsi-halloween-zombie-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
-
     Statement = [
       {
         Effect = "Allow"
         Action = "sts:AssumeRole"
-
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/AccountFullAccessRole"
+          AWS = var.trusted_role_arn
         }
       }
     ]
@@ -25,28 +23,24 @@ resource "aws_iam_role" "zombie" {
   }
 }
 
-resource "aws_iam_role_policy" "zombie_manage" {
-  name = "tsi-halloween-zombie-manage"
-  role = aws_iam_role.zombie.id
+# Customer-managed IAM policy
+
+resource "aws_iam_policy" "zombie_manage" {
+  name        = "tsi-halloween-zombie-manage"
+  description = "Manage Halloween gallery objects and tags"
 
   policy = jsonencode({
     Version = "2012-10-17"
-
     Statement = [
       {
-        Sid    = "ListGallery"
-        Effect = "Allow"
-
-        Action = [
-          "s3:ListBucket"
-        ]
-
+        Sid      = "ListGallery"
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
         Resource = aws_s3_bucket.gallery.arn
       },
       {
         Sid    = "ManageGalleryObjects"
         Effect = "Allow"
-
         Action = [
           "s3:GetObject",
           "s3:PutObject",
@@ -55,9 +49,15 @@ resource "aws_iam_role_policy" "zombie_manage" {
           "s3:PutObjectTagging",
           "s3:DeleteObjectTagging"
         ]
-
         Resource = "${aws_s3_bucket.gallery.arn}/*"
       }
     ]
   })
+}
+
+# Attach policy to Zombie role
+
+resource "aws_iam_role_policy_attachment" "zombie_manage" {
+  role       = aws_iam_role.zombie.name
+  policy_arn = aws_iam_policy.zombie_manage.arn
 }

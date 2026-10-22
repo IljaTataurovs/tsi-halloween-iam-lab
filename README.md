@@ -1,66 +1,67 @@
-\## IAM Policy Implementation
+## Deployment Results — 22 October 2026
 
+The Halloween Spooky Gallery infrastructure was successfully
+deployed to AWS using Terraform.
 
+### AWS Environment
 
-The project uses three customer-managed IAM policies:
+- AWS Region: eu-north-1 (Europe, Stockholm)
+- S3 Bucket: tsi-halloween-gallery-ilja-2026
+- Account: AWS project environment (Hold My Coffee)
+- Total Terraform resources: 13
 
+### Infrastructure
 
+The deployment uses two separate Terraform configurations:
 
-\- \*\*Ghost:\*\* `tsi-halloween-ghost-read` — allows listing the gallery bucket and reading objects.
+- `iam/` — 9 IAM resources:
+  - Ghost: read-only access
+  - Witch: upload and delete objects
+  - Zombie: object and tag management
+- `s3/` — 4 S3 resources:
+  - Private S3 bucket
+  - Block Public Access
+  - Bucket Versioning
+  - SSE-S3 encryption (AES-256)
 
-\- \*\*Witch:\*\* `tsi-halloween-witch-write` — allows uploading and deleting objects.
+### Verification
 
-\- \*\*Zombie:\*\* `tsi-halloween-zombie-manage` — allows listing, reading, uploading, deleting, and managing object tags.
+Verified in AWS Management Console:
 
+- S3 bucket exists in Stockholm
+- Bucket Versioning is enabled
+- Default encryption uses SSE-S3
+- Block All Public Access is enabled
+- Three IAM roles and their policies are created and attached
 
+Note: IAM policies were reviewed in the AWS Console.
+Live role-assumption access tests have not been completed.
 
-Each policy is attached to a separate IAM role using Terraform's `aws\_iam\_role\_policy\_attachment` resource.
+### Terraform Commands
 
+Deploy S3 infrastructure:
 
+    cd s3
+    terraform init
+    terraform plan
+    terraform apply
 
-All three roles use a trust policy restricted to the designated AWS IAM role, following the principle of least privilege.
+Deploy IAM infrastructure:
 
+    cd iam
+    terraform init
+    terraform plan
+    terraform apply
 
+### Cleanup
 
-\## Validation and Deployment Status
+After completing the assignment, remove resources
+using Terraform from each deployed working directory.
 
+    terraform destroy
 
-
-Terraform initialization and validation completed successfully.
-
-
-
-The final Terraform plan reports:
-
-
-
-`Plan: 13 to add, 0 to change, 0 to destroy.`
-
-
-
-The Terraform configuration has been uploaded to GitHub.
-
-
-
-AWS infrastructure deployment remains pending because an AWS Organizations Service Control Policy explicitly denies `s3:CreateBucket` in the current account.
-
-
-
-Consequently, live IAM role permission testing has not yet been performed.
-
-
-
-\## Cleanup
-
-
-
-After successful deployment and testing, remove the infrastructure using:
-
-
-
-`terraform destroy`
-
-
-
-Review the destruction plan before confirming. Versioned S3 objects must be removed before Terraform can delete a nonempty versioned bucket with the current configuration.
-
+IMPORTANT: The existing AWS resources are managed by
+separate local Terraform state files. Do not run
+terraform apply or destroy from a fresh repository clone
+without first importing the existing resources or
+restoring the correct state files.

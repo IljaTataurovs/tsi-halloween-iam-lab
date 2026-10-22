@@ -1,26 +1,18 @@
-
-# Terraform working directory
-.terraform/
-
-# Terraform state
+# Terraform local files
+**/.terraform/*
 *.tfstate
 *.tfstate.*
-
-# Terraform plans
 *.tfplan
-tfplan
-
-# Sensitive variables
 *.tfvars
 *.tfvars.json
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
-
-# Crash logs
 crash.log
 crash.*.log
 
-# Local AWS credentials
-.aws/
+# Local credentials and secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Keep Terraform provider lock files
+!.terraform.lock.hcl

@@ -13,7 +13,7 @@ resource "aws_iam_role" "witch" {
         Action = "sts:AssumeRole"
 
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/AccountFullAccessRole"
         }
       }
     ]

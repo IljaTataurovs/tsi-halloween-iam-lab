@@ -1,82 +1,66 @@
-\# TSI Halloween Spooky Gallery — Terraform IAM Lab
+\## IAM Policy Implementation
 
 
 
-\*\*Course:\*\* Cloud Infrastructure and Service Management  
-
-\*\*Lecturer:\*\* Dr. Aleksejs Vesjolijs  
-
-\*\*Student:\*\* Ilja Tataurovs
+The project uses three customer-managed IAM policies:
 
 
 
-\## 1. Project Overview
+\- \*\*Ghost:\*\* `tsi-halloween-ghost-read` — allows listing the gallery bucket and reading objects.
+
+\- \*\*Witch:\*\* `tsi-halloween-witch-write` — allows uploading and deleting objects.
+
+\- \*\*Zombie:\*\* `tsi-halloween-zombie-manage` — allows listing, reading, uploading, deleting, and managing object tags.
 
 
 
-This project demonstrates Infrastructure as Code (IaC) using Terraform and AWS Identity and Access Management (IAM).
+Each policy is attached to a separate IAM role using Terraform's `aws\_iam\_role\_policy\_attachment` resource.
 
 
 
-The objective is to configure a secure Halloween-themed S3 gallery with three IAM roles following the principle of least privilege.
+All three roles use a trust policy restricted to the designated AWS IAM role, following the principle of least privilege.
 
 
 
-\## 2. AWS Infrastructure
+\## Validation and Deployment Status
 
 
 
-The Terraform configuration defines:
+Terraform initialization and validation completed successfully.
 
 
 
-\- A private Amazon S3 bucket for the Halloween gallery
-
-\- S3 versioning and AES256 server-side encryption
-
-\- S3 Block Public Access settings
-
-\- Three IAM roles with separate trust and permission policies
+The final Terraform plan reports:
 
 
 
-\## 3. IAM Roles and Permissions
+`Plan: 13 to add, 0 to change, 0 to destroy.`
 
 
 
-| Permission | Ghost | Witch | Zombie |
-
-|---|---|---|---|
-
-| List bucket | Yes | No | Yes |
-
-| Download objects | Yes | No | Yes |
-
-| Upload objects | No | Yes | Yes |
-
-| Delete objects | No | Yes | Yes |
-
-| Manage object tags | No | No | Yes |
-
-| Manage bucket policies | No | No | No |
+The Terraform configuration has been uploaded to GitHub.
 
 
 
-\*\*Ghost:\*\* Read-only access to the gallery.
+AWS infrastructure deployment remains pending because an AWS Organizations Service Control Policy explicitly denies `s3:CreateBucket` in the current account.
 
 
 
-\*\*Witch:\*\* Uploads and deletes gallery objects without bucket administration permissions.
+Consequently, live IAM role permission testing has not yet been performed.
 
 
 
-\*\*Zombie:\*\* Manages gallery objects and object tags without full S3 administration permissions.
+\## Cleanup
 
 
 
-Each role has an IAM trust policy defining who may assume it and a permissions policy defining its permitted actions. The current trust policies use the AWS account principal as a teaching example and should be restricted to an approved identity before deployment.
+After successful deployment and testing, remove the infrastructure using:
 
 
 
+`terraform destroy`
 
+
+
+Review the destruction plan before confirming. Versioned S3 objects must be removed before Terraform can delete a nonempty versioned bucket with the current configuration.
 
